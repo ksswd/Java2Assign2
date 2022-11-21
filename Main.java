@@ -32,6 +32,7 @@ public class Main extends Application {
         Controller.printWriter.close();
         Controller.bufferedReader.close();
         Controller.socket.close();
+        System.exit(0);
     }
 
     public static void main(String[] args) {
