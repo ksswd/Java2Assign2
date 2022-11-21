@@ -38,6 +38,44 @@ public class Controller implements Initializable {
 
     private static final int[][] chessBoard = new int[3][3];
 
+    private static int FinalCheck() {
+        if (chessBoard[0][0]==chessBoard[1][1]&&
+                chessBoard[1][1]==chessBoard[2][2]&&chessBoard[2][2]==1)
+            return 1;
+        if (chessBoard[0][2]==chessBoard[1][1]&&
+                chessBoard[1][1]==chessBoard[2][0]&&chessBoard[2][0]==1)
+            return 1;
+        for (int i = 0; i < 3; i++) {
+            if(chessBoard[0][i]==chessBoard[1][i]&&
+                    chessBoard[1][i]==chessBoard[2][i]&&chessBoard[2][i]==1)
+                return 1;
+            if(chessBoard[i][0]==chessBoard[i][1]&&
+                    chessBoard[i][1]==chessBoard[i][2]&&chessBoard[i][2]==1)
+                return 1;
+        }
+        if (chessBoard[0][0]==chessBoard[1][1]&&
+                chessBoard[1][1]==chessBoard[2][2]&&chessBoard[2][2]==2)
+            return 2;
+        if (chessBoard[0][2]==chessBoard[1][1]&&
+                chessBoard[1][1]==chessBoard[2][0]&&chessBoard[2][0]==2)
+            return 2;
+        for (int i = 0; i < 3; i++) {
+            if(chessBoard[0][i]==chessBoard[1][i]&&
+                    chessBoard[1][i]==chessBoard[2][i]&&chessBoard[2][i]==2)
+                return 2;
+            if(chessBoard[i][0]==chessBoard[i][1]&&
+                    chessBoard[i][1]==chessBoard[i][2]&&chessBoard[i][2]==2)
+                return 2;
+        }
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (chessBoard[i][j]==0)
+                    return 0;
+            }
+        }
+        return 3;
+    }
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         game_panel.setOnMouseClicked(event -> {
@@ -49,8 +87,13 @@ public class Controller implements Initializable {
             if (chessBoard[x][y] != EMPTY){
                 return;
             }
+            if (FinalCheck()!=0){
+                printWriter.println(String.format("FinalCheck,%d,%d,%d", PlayerID, x, y));
+            }
             // send the operation to the server
-            printWriter.println(String.format("Gaming,%d,%d,%d", PlayerID, x, y));
+            else {
+                printWriter.println(String.format("Gaming,%d,%d,%d", PlayerID, x, y));
+            }
             printWriter.flush();
         });
     }
@@ -127,6 +170,7 @@ public class Controller implements Initializable {
                 try {
                     String readLine = bufferedReader.readLine();
                     String[] opcode = readLine.split(",");
+                    System.out.println(opcode[0]);
                     // set ID of each Client
 //                    System.out.println(opcode[0]);
                     if (Objects.equals(opcode[0], "SetID")) {
@@ -143,9 +187,11 @@ public class Controller implements Initializable {
                         CurrentPlayer = (lastTurn + 1) % 2;
                     }
                     else if (Objects.equals(opcode[0], "FinalCheck")) {
-                        int res = Integer.parseInt(opcode[1]);
+//                        int lastTurn = Integer.parseInt(opcode[1]);
+//                        refreshBoard(lastTurn, Integer.parseInt(opcode[2]), Integer.parseInt(opcode[3]));
+                        int res = FinalCheck();
                         if(res==1||res==2)
-                            System.out.println("Player:"+res+" win!");
+                            System.out.println("Player:"+(res-1)+" win!");
                         else if(res==3)
                             System.out.println("Tie!");
                         break;
