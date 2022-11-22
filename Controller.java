@@ -1,5 +1,12 @@
 package application.controller;
 
+import java.io.*;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.URL;
+import java.util.Objects;
+import java.util.ResourceBundle;
+
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -10,13 +17,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
-
-import java.io.*;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.net.URL;
-import java.util.Objects;
-import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
     private static final int EMPTY = 0;
@@ -39,37 +39,37 @@ public class Controller implements Initializable {
     private static final int[][] chessBoard = new int[3][3];
 
     private static int FinalCheck() {
-        if (chessBoard[0][0]==chessBoard[1][1]&&
-                chessBoard[1][1]==chessBoard[2][2]&&chessBoard[2][2]==1)
+        if (chessBoard[0][0] == chessBoard[1][1] &&
+                chessBoard[1][1] == chessBoard[2][2] && chessBoard[2][2] == 1)
             return 1;
-        if (chessBoard[0][2]==chessBoard[1][1]&&
-                chessBoard[1][1]==chessBoard[2][0]&&chessBoard[2][0]==1)
+        if (chessBoard[0][2] == chessBoard[1][1] &&
+                chessBoard[1][1] == chessBoard[2][0] && chessBoard[2][0] == 1)
             return 1;
         for (int i = 0; i < 3; i++) {
-            if(chessBoard[0][i]==chessBoard[1][i]&&
-                    chessBoard[1][i]==chessBoard[2][i]&&chessBoard[2][i]==1)
+            if (chessBoard[0][i] == chessBoard[1][i] &&
+                    chessBoard[1][i] == chessBoard[2][i] && chessBoard[2][i] == 1)
                 return 1;
-            if(chessBoard[i][0]==chessBoard[i][1]&&
-                    chessBoard[i][1]==chessBoard[i][2]&&chessBoard[i][2]==1)
+            if (chessBoard[i][0] == chessBoard[i][1] &&
+                    chessBoard[i][1] == chessBoard[i][2] && chessBoard[i][2] == 1)
                 return 1;
         }
-        if (chessBoard[0][0]==chessBoard[1][1]&&
-                chessBoard[1][1]==chessBoard[2][2]&&chessBoard[2][2]==2)
+        if (chessBoard[0][0] == chessBoard[1][1] &&
+                chessBoard[1][1] == chessBoard[2][2] && chessBoard[2][2] == 2)
             return 2;
-        if (chessBoard[0][2]==chessBoard[1][1]&&
-                chessBoard[1][1]==chessBoard[2][0]&&chessBoard[2][0]==2)
+        if (chessBoard[0][2] == chessBoard[1][1]
+                && chessBoard[1][1] == chessBoard[2][0] && chessBoard[2][0] == 2)
             return 2;
         for (int i = 0; i < 3; i++) {
-            if(chessBoard[0][i]==chessBoard[1][i]&&
-                    chessBoard[1][i]==chessBoard[2][i]&&chessBoard[2][i]==2)
+            if (chessBoard[0][i] == chessBoard[1][i]
+                    && chessBoard[1][i] == chessBoard[2][i] && chessBoard[2][i] == 2)
                 return 2;
-            if(chessBoard[i][0]==chessBoard[i][1]&&
-                    chessBoard[i][1]==chessBoard[i][2]&&chessBoard[i][2]==2)
+            if (chessBoard[i][0] == chessBoard[i][1] &&
+                    chessBoard[i][1] == chessBoard[i][2] && chessBoard[i][2] == 2)
                 return 2;
         }
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                if (chessBoard[i][j]==0)
+                if (chessBoard[i][j] == 0)
                     return 0;
             }
         }
@@ -84,10 +84,10 @@ public class Controller implements Initializable {
             }
             int x = (int) (event.getX() / BOUND);
             int y = (int) (event.getY() / BOUND);
-            if (chessBoard[x][y] != EMPTY){
+            if (chessBoard[x][y] != EMPTY) {
                 return;
             }
-            if (FinalCheck()!=0){
+            if (FinalCheck() != 0) {
                 printWriter.println(String.format("FinalCheck,%d,%d,%d", PlayerID, x, y));
             }
             // send the operation to the server
@@ -176,27 +176,23 @@ public class Controller implements Initializable {
                     if (Objects.equals(opcode[0], "SetID")) {
                         PlayerID = Integer.parseInt(opcode[1]);
                         System.out.println("Your ID is " + PlayerID);
-                    }
-                    else if (Objects.equals(opcode[0], "StartGame")) {
+                    } else if (Objects.equals(opcode[0], "StartGame")) {
                         CurrentPlayer = Integer.parseInt(opcode[1]);
                         System.out.println("Game Start!");
-                    }
-                    else if(Objects.equals(opcode[0], "Gaming")){
+                    } else if (Objects.equals(opcode[0], "Gaming")) {
                         int lastTurn = Integer.parseInt(opcode[1]);
                         refreshBoard(lastTurn, Integer.parseInt(opcode[2]), Integer.parseInt(opcode[3]));
                         CurrentPlayer = (lastTurn + 1) % 2;
-                    }
-                    else if (Objects.equals(opcode[0], "FinalCheck")) {
+                    } else if (Objects.equals(opcode[0], "FinalCheck")) {
 //                        int lastTurn = Integer.parseInt(opcode[1]);
 //                        refreshBoard(lastTurn, Integer.parseInt(opcode[2]), Integer.parseInt(opcode[3]));
                         int res = FinalCheck();
-                        if(res==1||res==2)
-                            System.out.println("Player:"+(res-1)+" win!");
-                        else if(res==3)
+                        if (res == 1 || res == 2)
+                            System.out.println("Player:" + (res - 1) + " win!");
+                        else if (res == 3)
                             System.out.println("Tie!");
                         break;
-                    }
-                    else if (Objects.equals(opcode[0], "Disconnect")){
+                    } else if (Objects.equals(opcode[0], "Disconnect")) {
                         System.out.println("Your opponent is disconnected!");
                         System.out.println("You win!");
                         break;
